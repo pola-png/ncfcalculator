@@ -1,0 +1,10 @@
+{
+  "id": "app.ncfcalculator.com",
+  "name": "NCF Calculator",
+  "short_name": "NCF Calculator",
+  "description": "Net Cash Flow & Multi-Period Cash Analysis",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f4f6f9",
+  "theme_color": "#2563eb"
+}

@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NCF Calculator — Net Cash Flow</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-badge" aria-hidden="true">NCF</div>
+        <div>
+          <h1>NCF Calculator</h1>
+          <p class="subtitle">Net Cash Flow &amp; Multi-Period Cash Analysis</p>
+        </div>
+      </div>
+
+      <div class="header-controls">
+        <label class="control-group">
+          <span>Currency</span>
+          <select id="currencySelect" aria-label="Currency">
+            <option value="USD" data-symbol="$">USD ($)</option>
+            <option value="EUR" data-symbol="€">EUR (€)</option>
+            <option value="GBP" data-symbol="£">GBP (£)</option>
+            <option value="JPY" data-symbol="¥">JPY (¥)</option>
+            <option value="CAD" data-symbol="C$">CAD (C$)</option>
+            <option value="AUD" data-symbol="A$">AUD (A$)</option>
+          </select>
+        </label>
+
+        <div class="preset-actions">
+          <button type="button" class="btn btn-ghost" id="loadSampleBtn">Load Sample</button>
+          <button type="button" class="btn btn-ghost" id="resetAllBtn">Reset</button>
+          <button type="button" class="btn btn-primary" id="exportCsvBtn">Export CSV</button>
+        </div>
+      </div>
+    </header>
+
+    <nav class="mode-tabs" role="tablist" aria-label="Calculation Modes">
+      <button
+        type="button"
+        class="tab-btn active"
+        role="tab"
+        aria-selected="true"
+        data-mode="activity"
+      >
+        Activity Method (OCF + ICF + FCF)
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        role="tab"
+        aria-selected="false"
+        data-mode="direct"
+      >
+        Inflows vs. Outflows
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        role="tab"
+        aria-selected="false"
+        data-mode="multiperiod"
+      >
+        Multi-Period &amp; Cumulative
+      </button>
+    </nav>
+
+    <main class="main-grid">
+      <!-- Left: Inputs -->
+      <section class="input-column">
+        <!-- Mode 1: Activity Method -->
+        <div id="panel-activity" class="mode-panel active">
+          <div class="card cash-balance-card">
+            <div class="card-header-inline">
+              <h2>Cash Position</h2>
+              <span class="hint">Optional starting balance for ending cash</span>
+            </div>
+            <div class="field-row">
+              <label for="activityBeginningCash">Beginning Cash Balance</label>
+              <div class="money-input">
+                <span class="currency-prefix">$</span>
+                <input type="number" id="activityBeginningCash" step="any" value="25000" />
+              </div>
+            </div>
+          </div>
+
+          <div class="card category-card" data-category="operating">
+            <div class="card-header-inline">
+              <div>
+                <h2>Operating Cash Flow (OCF)</h2>
+                <p class="card-desc">Core business receipts and operating expenses</p>
+              </div>
+              <div class="category-subtotal" id="subtotal-operating">$0.00</div>
+            </div>
+            <div class="line-items" id="items-operating"></div>
+            <button type="button" class="btn btn-add-item" data-add-category="operating">
+              + Add Operating Item
+            </button>
+          </div>
+
+          <div class="card category-card" data-category="investing">
+            <div class="card-header-inline">
+              <div>
+                <h2>Investing Cash Flow (ICF)</h2>
+                <p class="card-desc">Capital expenditures, equipment, and asset sales</p>
+              </div>
+              <div class="category-subtotal" id="subtotal-investing">$0.00</div>
+            </div>
+            <div class="line-items" id="items-investing"></div>
+            <button type="button" class="btn btn-add-item" data-add-category="investing">
+              + Add Investing Item
+            </button>
+          </div>
+
+          <div class="card category-card" data-category="financing">
+            <div class="card-header-inline">
+              <div>
+                <h2>Financing Cash Flow (FCF)</h2>
+                <p class="card-desc">Loans, equity funding, repayments, and dividends</p>
+              </div>
+              <div class="category-subtotal" id="subtotal-financing">$0.00</div>
+            </div>
+            <div class="line-items" id="items-financing"></div>
+            <button type="button" class="btn btn-add-item" data-add-category="financing">
+              + Add Financing Item
+            </button>
+          </div>
+        </div>
+
+        <!-- Mode 2: Direct Inflows vs Outflows -->
+        <div id="panel-direct" class="mode-panel">
+          <div class="card cash-balance-card">
+            <div class="card-header-inline">
+              <h2>Cash Position</h2>
+              <span class="hint">NCF = Total Cash Inflows &minus; Total Cash Outflows</span>
+            </div>
+            <div class="field-row">
+              <label for="directBeginningCash">Beginning Cash Balance</label>
+              <div class="money-input">
+                <span class="currency-prefix">$</span>
+                <input type="number" id="directBeginningCash" step="any" value="25000" />
+              </div>
+            </div>
+          </div>
+
+          <div class="card category-card">
+            <div class="card-header-inline">
+              <div>
+                <h2>Cash Inflows (+)</h2>
+                <p class="card-desc">All cash received during the period</p>
+              </div>
+              <div class="category-subtotal positive" id="subtotal-inflows">$0.00</div>
+            </div>
+            <div class="line-items" id="items-inflows"></div>
+            <button type="button" class="btn btn-add-item" data-add-direct="inflows">
+              + Add Cash Inflow
+            </button>
+          </div>
+
+          <div class="card category-card">
+            <div class="card-header-inline">
+              <div>
+                <h2>Cash Outflows (&minus;)</h2>
+                <p class="card-desc">All cash spent or distributed during the period</p>
+              </div>
+              <div class="category-subtotal negative" id="subtotal-outflows">$0.00</div>
+            </div>
+            <div class="line-items" id="items-outflows"></div>
+            <button type="button" class="btn btn-add-item" data-add-direct="outflows">
+              + Add Cash Outflow
+            </button>
+          </div>
+        </div>
+
+        <!-- Mode 3: Multi-Period & Cumulative -->
+        <div id="panel-multiperiod" class="mode-panel">
+          <div class="card">
+            <div class="card-header-inline">
+              <div>
+                <h2>Multi-Period NCF Schedule</h2>
+                <p class="card-desc">Track inflows, outflows, cumulative cash, and discounted NPV</p>
+              </div>
+              <button type="button" class="btn btn-add-item" id="addPeriodBtn">+ Add Period</button>
+            </div>
+
+            <div class="multi-settings">
+              <label class="field-row compact">
+                <span>Starting Cash</span>
+                <div class="money-input">
+                  <span class="currency-prefix">$</span>
+                  <input type="number" id="multiBeginningCash" step="any" value="10000" />
+                </div>
+              </label>
+              <label class="field-row compact">
+                <span>Discount Rate (% / period)</span>
+                <div class="money-input">
+                  <input type="number" id="discountRate" step="0.1" min="0" max="100" value="8" />
+                  <span class="unit-suffix">%</span>
+                </div>
+              </label>
+            </div>
+
+            <div class="table-wrap">
+              <table class="period-table">
+                <thead>
+                  <tr>
+                    <th>Period</th>
+                    <th>Inflows</th>
+                    <th>Outflows</th>
+                    <th>Period NCF</th>
+                    <th>Cumulative Cash</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="periodTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: Live Results & Visualization -->
+      <aside class="results-column">
+        <div class="card summary-card">
+          <div class="summary-label" id="summaryModeLabel">Net Cash Flow (NCF)</div>
+          <div class="summary-value" id="ncfHeroValue">$0.00</div>
+          <div class="summary-badge" id="ncfStatusBadge">Neutral</div>
+
+          <div class="formula-box" id="formulaDisplay">
+            NCF = OCF + ICF + FCF
+          </div>
+
+          <div class="metrics-grid" id="metricsGrid"></div>
+        </div>
+
+        <div class="card chart-card">
+          <div class="card-header-inline">
+            <h2 id="chartTitle">Cash Flow Breakdown</h2>
+          </div>
+          <div id="chartContainer" class="chart-container"></div>
+        </div>
+      </aside>
+    </main>
+
+    <footer class="app-footer">
+      <span>NCF Calculator (<code>app.ncfcalculator.com</code>)</span>
+      <a href="privacy.html">Privacy Policy</a>
+    </footer>
+  </div>
+
+  <script src="calculator.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

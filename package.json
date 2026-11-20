@@ -1,0 +1,17 @@
+{
+  "name": "app.ncfcalculator.com",
+  "version": "1.0.0",
+  "description": "Net Cash Flow (NCF) Calculator web and Android application",
+  "main": "calculator.js",
+  "scripts": {
+    "test": "node -e \"const c=require('./calculator.js'); console.log(typeof c.calculateActivityNCF)\"",
+    "build:web": "node -e \"const fs=require('fs'),p=require('path'); fs.mkdirSync('www',{recursive:true}); ['index.html','styles.css','calculator.js','app.js','manifest.webmanifest','privacy.html'].forEach(f=>fs.copyFileSync(f,p.join('www',f)));\"",
+    "android:sync": "npm run build:web && npx cap sync android"
+  },
+  "private": true,
+  "dependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/cli": "^8.6.2",
+    "@capacitor/core": "^8.6.2"
+  }
+}

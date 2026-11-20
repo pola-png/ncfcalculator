@@ -1,0 +1,22 @@
+# Dependencies & build outputs
+node_modules/
+www/
+dist/
+
+# Keystores & signing secrets (NEVER commit these to GitHub)
+*.jks
+*.keystore
+keystore.properties
+key.properties
+
+# Android build & local files
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+android/.idea/
+*.iml
+
+# OS / Editor
+.DS_Store
+Thumbs.db
